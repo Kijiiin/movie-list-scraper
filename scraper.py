@@ -1,119 +1,121 @@
 from playwright.sync_api import sync_playwright
-import requests
 import json
+import re
 from datetime import datetime
-import time
 
-# URL dell'archivio (solo film)
+# URL dell'archivio con solo film
 URL = "https://streamingcommunityz.support/it/archive?type=movie"
+# Nome del file JSON esistente (per aggiornamento incrementale)
+JSON_FILE = "movies.json"
 
-# La tua API key TMDb (mettila qui o come variabile d'ambiente)
-TMDB_API_KEY = "7fe396e6f50677047459e8c173f2bd9d"  # la tua chiave
-
-def search_tmdb_id(title, year=None, media_type='movie'):
-    """
-    Cerca su TMDb l'ID del film o serie TV.
-    Restituisce l'ID oppure None se non trovato.
-    """
-    # Costruisci la query
-    search_url = f"https://api.themoviedb.org/3/search/{media_type}"
-    params = {
-        'api_key': TMDB_API_KEY,
-        'query': title,
-        'language': 'it-IT',
-        'page': 1
-    }
-    if year:
-        # Aggiungi l'anno per migliorare la ricerca (solo per film)
-        if media_type == 'movie':
-            params['year'] = year
-
+def extract_tmdb_id(page, film_url):
+    """Apre la pagina del film e cerca l'ID TMDB."""
     try:
-        response = requests.get(search_url, params=params, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        if data['results']:
-            # Prendi il primo risultato
-            first = data['results'][0]
-            # Se l'anno è specificato e non corrisponde, prova a cercare meglio?
-            # Per semplicità prendiamo il primo.
-            return first['id']
-        else:
-            return None
+        page.goto(film_url, timeout=10000)
+        page.wait_for_selector("body", timeout=5000)
+        html = page.content()
+        # Cerca pattern comuni: "tmdb_id":12345 oppure "tmdb":12345
+        match = re.search(r'"tmdb_id"\s*:\s*(\d+)', html)
+        if not match:
+            match = re.search(r'"tmdb"\s*:\s*(\d+)', html)
+        if match:
+            return int(match.group(1))
+        # Alternativa: cerca nell'URL o in un meta
+        # Se non trovato, restituisce None
+        return None
     except Exception as e:
-        print(f"⚠️ Errore nella ricerca TMDb per '{title}': {e}")
+        print(f"   ⚠️ Errore nel recupero TMDB per {film_url}: {e}")
         return None
 
 def scrape_movies():
+    # Carica il file JSON esistente (se c'è)
+    existing = {}
+    try:
+        with open(JSON_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            # Crea un dizionario per accesso veloce per titolo
+            for item in data:
+                existing[item["title"]] = item
+    except FileNotFoundError:
+        existing = {}
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        print("🌐 Caricamento pagina...")
+
+        print("🌐 Caricamento pagina archive...")
         page.goto(URL)
-        page.wait_for_selector(".slider-item a", timeout=15000)
 
-        # Scroll per caricare più film (aumenta il range se vuoi più film)
-        for _ in range(5):  # facciamo 5 scroll per caricare più contenuti
-            page.mouse.wheel(0, 800)
-            page.wait_for_timeout(1000)
+        # Aspetta che compaiano i link ai film (max 20 secondi)
+        page.wait_for_selector("a[href*='/titles/']", timeout=20000)
 
-        items = page.query_selector_all(".slider-item a")
-        print(f"📦 Trovati {len(items)} elementi")
+        # Scroll per caricare più film (ripetere finché non smette di caricare)
+        last_count = 0
+        for _ in range(5):  # max 5 scroll
+            page.mouse.wheel(0, 1000)
+            page.wait_for_timeout(2000)
+            # Conta i link attuali
+            links = page.query_selector_all("a[href*='/titles/']")
+            if len(links) == last_count:
+                break  # non ci sono più nuovi film
+            last_count = len(links)
 
-        movies = []
-        # Per evitare di cercare troppe volte TMDb, limitiamo il numero di film (es. 50)
-        # Puoi rimuovere il limite se vuoi tutti
-        for idx, item in enumerate(items[:50]):  # Cambia 50 per avere più film
-            img = item.query_selector("img")
-            if img:
-                titolo = img.get_attribute("alt")
-                link = item.get_attribute("href")
-                if link and not link.startswith("http"):
-                    link = "https://streamingcommunityz.support" + link
+        # Raccogli tutti i link
+        links = page.query_selector_all("a[href*='/titles/']")
+        print(f"📦 Trovati {len(links)} link a film.")
 
-                if titolo and link:
-                    # Tentativo di estrarre l'anno dal titolo? 
-                    # Potremmo prendere l'anno dal titolo se presente tra parentesi
-                    # Esempio: "Fúria (2025)" - ma potrebbe non esserci.
-                    # Per semplicità, lo saltiamo.
-                    year = None
+        new_movies = []
+        updated_count = 0
 
-                    # Cerca TMDb ID
-                    tmdb_id = search_tmdb_id(titolo, year, 'movie')
-                    # Se non trovato come film, prova come serie TV? 
-                    # Ma vogliamo solo film, quindi skip se non trovato.
-                    if tmdb_id is None:
-                        # Potresti voler salvare comunque il film senza ID? 
-                        # Decidi tu. Per ora lo saltiamo.
-                        print(f"⚠️ ID TMDb non trovato per '{titolo}', salto...")
-                        continue
+        for link in links:
+            href = link.get_attribute("href")
+            if not href:
+                continue
+            if not href.startswith("http"):
+                href = "https://streamingcommunityz.support" + href
 
-                    movies.append({
-                        "title": titolo.strip(),
-                        "url": link,
-                        "tmdb_id": tmdb_id,
-                        "fetched_at": datetime.now().isoformat()
-                    })
-                    # Pausa per evitare rate limit (0.5 secondi tra una ricerca e l'altra)
-                    time.sleep(0.5)
+            # Cerca l'immagine all'interno del link
+            img = link.query_selector("img")
+            if not img:
+                continue
+            title = img.get_attribute("alt")
+            if not title:
+                continue
+            title = title.strip()
+
+            # Se il film esiste già e ha tmdb_id, lo saltiamo
+            if title in existing and existing[title].get("tmdb_id"):
+                print(f"⏩ Già presente: {title}")
+                continue
+
+            # Altrimenti lo elaboriamo
+            print(f"🆕 Nuovo film: {title}")
+            # Apri la pagina del film per trovare tmdb_id
+            tmdb_id = extract_tmdb_id(page, href)
+
+            movie_data = {
+                "title": title,
+                "url": href,
+                "tmdb_id": tmdb_id,
+                "fetched_at": datetime.now().isoformat()
+            }
+            new_movies.append(movie_data)
+            updated_count += 1
+
+            # Aggiorna il dizionario esistente (per evitare duplicati nello stesso run)
+            existing[title] = movie_data
 
         browser.close()
 
-        # Rimuovi duplicati (lo facciamo già con il controllo dell'ID TMDb? 
-        # Potrebbero esserci duplicati se lo stesso film compare due volte)
-        seen_ids = set()
-        unique_movies = []
-        for m in movies:
-            if m['tmdb_id'] not in seen_ids:
-                seen_ids.add(m['tmdb_id'])
-                unique_movies.append(m)
+        # Ora uniamo i dati esistenti con i nuovi
+        # existing contiene già tutti (vecchi + nuovi), ma dobbiamo convertire in lista
+        final_list = list(existing.values())
 
         # Salva in JSON
-        with open('movies.json', 'w', encoding='utf-8') as f:
-            json.dump(unique_movies, f, ensure_ascii=False, indent=2)
+        with open(JSON_FILE, "w", encoding="utf-8") as f:
+            json.dump(final_list, f, ensure_ascii=False, indent=2)
 
-        print(f"✅ Salvati {len(unique_movies)} film unici con TMDb ID in movies.json")
-        return unique_movies
+        print(f"✅ Aggiornamento completato. Totale film: {len(final_list)}, nuovi aggiunti/aggiornati: {updated_count}")
 
 if __name__ == "__main__":
     scrape_movies()
