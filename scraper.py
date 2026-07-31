@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 # URL dell'archivio (ordinato per data di uscita)
-URL = "https://streamingcommunityz.support/it/archive"
+URL = "https://streamingcommunityz.support/it/archive?type=movie"
 
 def scrape_movies():
     with sync_playwright() as p:
