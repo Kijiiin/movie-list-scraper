@@ -2,7 +2,7 @@ name: Cleanup old workflow runs
 
 on:
   schedule:
-    - cron: '0 0 * * 0'   # Ogni domenica a mezzanotte
+    - cron: '0 0 * * *'   # Ogni giorno a mezzanotte
   workflow_dispatch:       # Esecuzione manuale
 
 jobs:
@@ -13,10 +13,10 @@ jobs:
       contents: read
       
     steps:
-      - name: Delete workflow runs older than 30 days
+      - name: Delete all workflow runs except the latest one
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          retain_days: 30
-          keep_minimum_runs: 10   # Mantieni almeno gli ultimi 10 run
+          retain_days: 0              # Non conservare in base ai giorni
+          keep_minimum_runs: 1        # 👈 Mantieni SOLO l'ultimo run
