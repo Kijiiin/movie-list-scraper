@@ -1,0 +1,45 @@
+name: Scraping StreamingCommunity
+
+# Quando eseguire lo script:
+on:
+  schedule:
+    # Ogni 6 ore (puoi cambiare, es. '0 */12 * * *' per ogni 12 ore)
+    - cron: '0 */6 * * *'
+  # Permette di eseguirlo manualmente dal pulsante "Run workflow"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    # Diamo il permesso di scrivere nel repository (per fare il commit del file JSON)
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Scarica il codice del repository
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. Installa Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Installa le librerie necessarie (requests e beautifulsoup)
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      # 4. Esegue il nostro script
+      - name: Run scraper
+        run: python scraper.py
+
+      # 5. Se il file movies.json è cambiato, lo salva (commit) e lo carica sul repository
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add movies.json
+          git diff --staged --quiet || git commit -m "Aggiornamento automatico lista film"
+          git push
