@@ -1,31 +1,25 @@
 from playwright.sync_api import sync_playwright
 import json
 from datetime import datetime
-
-# URL dell'archivio (ordinato per data di uscita)
-URL = "https://streamingcommunityz.support/it/archive?type=movie"
+import config  # 👈 importa la configurazione
 
 def scrape_movies():
+    # Usa l'URL da config
+    url = config.MOVIES_URL
+    base_url = config.BASE_URL
+
+    print(f"🌐 Caricamento pagina film: {url}")
+
     with sync_playwright() as p:
-        # Avvia browser (headless = senza interfaccia grafica)
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-
-        # Vai alla pagina archive
-        print("🌐 Caricamento pagina...")
-        page.goto(URL)
-
-        # Aspetta che appaiano i film (massimo 15 secondi)
-        # I film sono dentro .slider-item, come nella home
+        page.goto(url)
         page.wait_for_selector(".slider-item a", timeout=15000)
 
-        # Scorri un po' la pagina per caricare più film (se il sito carica all'infinito)
-        # Questo simula lo scroll dell'utente per attivare il caricamento lazy
         for _ in range(3):
             page.mouse.wheel(0, 800)
             page.wait_for_timeout(1000)
 
-        # Prendi tutti i link dei film
         items = page.query_selector_all(".slider-item a")
         print(f"📦 Trovati {len(items)} elementi")
 
@@ -36,7 +30,7 @@ def scrape_movies():
                 titolo = img.get_attribute("alt")
                 link = item.get_attribute("href")
                 if link and not link.startswith("http"):
-                    link = "https://streamingcommunityz.support" + link
+                    link = base_url + link
                 if titolo and link:
                     movies.append({
                         "title": titolo.strip(),
@@ -46,7 +40,6 @@ def scrape_movies():
 
         browser.close()
 
-        # Rimuovi duplicati (stesso titolo potrebbe apparire più volte)
         seen = set()
         unique_movies = []
         for m in movies:
@@ -54,7 +47,6 @@ def scrape_movies():
                 seen.add(m["title"])
                 unique_movies.append(m)
 
-        # Salva in JSON
         with open("movies.json", "w", encoding="utf-8") as f:
             json.dump(unique_movies, f, ensure_ascii=False, indent=2)
 
