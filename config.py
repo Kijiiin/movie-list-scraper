@@ -17,4 +17,5 @@ BASE_URL = f"https://{STREAMING_DOMAIN}"
 
 # Endpoint per film e serie TV
 MOVIES_URL = f"{BASE_URL}/it/archive?type=movie"
-TV_URL = f"{BASE_URL}/it/archive?type=tv"
+TV_URL = f"{BASE_URL}/it/archive?sort=last_air_date&type=tv"
+ 
