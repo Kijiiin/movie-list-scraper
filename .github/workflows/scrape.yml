@@ -1,9 +1,9 @@
-name: Scraping StreamingCommunity Archive
+name: Scraping StreamingCommunity (Film e Serie TV)
 
 on:
   schedule:
     - cron: '0 */6 * * *'   # Ogni 6 ore
-  workflow_dispatch:        # Permette l'esecuzione manuale
+  workflow_dispatch:        # Esecuzione manuale
 
 jobs:
   scrape:
@@ -25,13 +25,19 @@ jobs:
           pip install playwright
           playwright install chromium
 
-      - name: Run scraper
-        run: python scraper.py
+      # 1. Esegui lo scraper per i FILM
+      - name: Scraping film
+        run: python scraper_movie.py
 
+      # 2. Esegui lo scraper per le SERIE TV
+      - name: Scraping serie TV
+        run: python scraper_tv.py
+
+      # 3. Salva (commit) entrambi i file JSON se modificati
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add movies.json
-          git diff --staged --quiet || git commit -m "Aggiornamento automatico lista film da archive"
+          git add movies.json tv.json
+          git diff --staged --quiet || git commit -m "Aggiornamento automatico film e serie TV"
           git push
