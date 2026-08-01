@@ -1,0 +1,43 @@
+name: Scraping StreamingCommunity (Film e Serie TV)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # Ogni 6 ore
+  workflow_dispatch:        # Esecuzione manuale
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      # 1. Esegui lo scraper per i FILM
+      - name: Scraping film
+        run: python scraper_movie.py
+
+      # 2. Esegui lo scraper per le SERIE TV
+      - name: Scraping serie TV
+        run: python scraper_tv.py
+
+      # 3. Salva (commit) entrambi i file JSON se modificati
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add movies.json tv.json
+          git diff --staged --quiet || git commit -m "Aggiornamento automatico film e serie TV"
+          git push
