@@ -38,6 +38,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add movies.json tv.json
+          git add movies.json tv.json movies_popular.json tv_popular.json
           git diff --staged --quiet || git commit -m "Aggiornamento automatico film e serie TV"
           git push
