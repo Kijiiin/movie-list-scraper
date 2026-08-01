@@ -33,19 +33,11 @@ jobs:
       - name: Scraping serie TV
         run: python scraper_tv.py
 
-      # 3. Esegui lo scraper per le SERIE TV
-      - name: Scraping film popolari
-        run: python scraper_movie_popular.py
-
-      # 4. Esegui lo scraper per le SERIE TV popolari
-      - name: Scraping serie TV
-        run: python scraper_tv_popular.py
-
-      # 5. Salva (commit) entrambi i file JSON se modificati
+      # 3. Salva (commit) entrambi i file JSON se modificati
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add movies.json tv.json movies_popular.json tv_popular.json
+          git add movies.json tv.json
           git diff --staged --quiet || git commit -m "Aggiornamento automatico film e serie TV"
           git push
