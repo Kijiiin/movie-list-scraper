@@ -25,25 +25,28 @@ jobs:
           pip install playwright
           playwright install chromium
 
-      # 1. Esegui lo scraper per i FILM
+      # 1. Esegui lo scraper per i FILM (ultimi usciti)
       - name: Scraping film
         run: python scraper_movie.py
 
-      # 2. Esegui lo scraper per le SERIE TV
+      # 2. Esegui lo scraper per le SERIE TV (ultimi usciti)
       - name: Scraping serie TV
         run: python scraper_tv.py
 
+      # 3. Esegui lo scraper per i FILM POPOLARI
       - name: Scraping film popolari    
         run: python scraper_movie_popular.py
 
+      # 4. Esegui lo scraper per le SERIE TV POPOLARI
       - name: Scraping serie TV popolari
         run: python scraper_tv_popular.py
 
-      # 3. Salva (commit) entrambi i file JSON se modificati
+      # 5. Salva (commit) TUTTI i file JSON se modificati
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add movies.json tv.json
+          # 🔥 Aggiungi TUTTI e 4 i file JSON
+          git add movies.json tv.json movies_popular.json tv_popular.json
           git diff --staged --quiet || git commit -m "Aggiornamento automatico film e serie TV"
           git push
