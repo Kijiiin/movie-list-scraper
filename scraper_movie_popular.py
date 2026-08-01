@@ -1,31 +1,40 @@
 from playwright.sync_api import sync_playwright
 import json
 from datetime import datetime
-import config  # 👈 importa la configurazione
+import config
 
-def scrape_movies():
-    # Usa l'URL da config
+def scrape_movies_popular():
     url = config.MOVIES_POPULAR_URL
     base_url = config.BASE_URL
 
-    print(f"🌐 Caricamento pagina film: {url}")
+    print(f"🌐 Caricamento pagina film popolari: {url}")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(url)
-        page.wait_for_selector(".slider-item a", timeout=15000)
+        
+        try:
+            page.goto(url, timeout=20000)
+            # 🔥 ATTENDE che appaiano i link dei titoli (classe specifica per trending)
+            page.wait_for_selector("a.slider-tile-mobile", timeout=15000)
+        except Exception as e:
+            print(f"❌ Errore nel caricamento: {e}")
+            browser.close()
+            return []
 
+        # Scorri per caricare più elementi (se necessario)
         for _ in range(3):
             page.mouse.wheel(0, 800)
             page.wait_for_timeout(1000)
 
-        items = page.query_selector_all(".slider-item a")
+        # 🔥 SELEZIONA TUTTI I LINK DEI TITOLI
+        items = page.query_selector_all("a.slider-tile-mobile")
         print(f"📦 Trovati {len(items)} elementi")
 
         movies = []
         for item in items:
-            img = item.query_selector("img")
+            # Dentro il link, cerca l'immagine
+            img = item.query_selector("div.title-boxart img")
             if img:
                 titolo = img.get_attribute("alt")
                 link = item.get_attribute("href")
@@ -54,4 +63,4 @@ def scrape_movies():
         return unique_movies
 
 if __name__ == "__main__":
-    scrape_movies()
+    scrape_movies_popular()
