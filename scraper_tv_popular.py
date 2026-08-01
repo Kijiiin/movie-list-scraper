@@ -47,7 +47,7 @@ def scrape_movies():
                 seen.add(m["title"])
                 unique_movies.append(m)
 
-        with open("movies.json", "w", encoding="utf-8") as f:
+        with open("tv_popular.json", "w", encoding="utf-8") as f:
             json.dump(unique_movies, f, ensure_ascii=False, indent=2)
 
         print(f"✅ Salvati {len(unique_movies)} film unici in tv_popular.json")
