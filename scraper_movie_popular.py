@@ -50,7 +50,7 @@ def scrape_movies():
         with open("movies.json", "w", encoding="utf-8") as f:
             json.dump(unique_movies, f, ensure_ascii=False, indent=2)
 
-        print(f"✅ Salvati {len(unique_movies)} film unici in movies.json")
+        print(f"✅ Salvati {len(unique_movies)} film unici in movies_popular.json")
         return unique_movies
 
 if __name__ == "__main__":
