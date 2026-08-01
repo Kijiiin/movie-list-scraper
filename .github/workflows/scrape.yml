@@ -33,6 +33,12 @@ jobs:
       - name: Scraping serie TV
         run: python scraper_tv.py
 
+      - name: Scraping film popolari    
+        run: python scraper_movie_popular.py
+
+      - name: Scraping serie TV popolari
+        run: python scraper_tv_popular.py
+
       # 3. Salva (commit) entrambi i file JSON se modificati
       - name: Commit and push if changed
         run: |
