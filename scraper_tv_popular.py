@@ -5,7 +5,7 @@ import config  # 👈 importa la configurazione
 
 def scrape_tv():
     # Usa l'URL da config
-    url = config.TV_URL
+    url = config.TV_POPULAR_URL
     base_url = config.BASE_URL
 
     print(f"🌐 Caricamento pagina serie TV: {url}")
