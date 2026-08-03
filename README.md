@@ -1,5 +1,5 @@
 ## Streaming Domain
 
-<!-- STREAMING_DOMAIN -->
+<!-- BASE_URL -->
 streamingcommunityz.recipes
-<!-- /STREAMING_DOMAIN -->
+<!-- /BASE_URL -->
