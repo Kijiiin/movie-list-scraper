@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- STREAMING_DOMAIN -->
-https://dominio-vecchio.com
+streamingcommunityz.recipes
 <!-- /STREAMING_DOMAIN -->
