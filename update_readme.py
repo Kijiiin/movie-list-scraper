@@ -37,4 +37,4 @@ if count == 0:
 
 readme_path.write_text(new_readme, encoding="utf-8")
 
-print(f"BASE_URL: {domain}")
+print(f"BASE_URL aggiornato: {domain}")
