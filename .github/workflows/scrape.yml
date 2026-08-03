@@ -45,7 +45,7 @@ jobs:
           readme = readme_path.read_text(encoding="utf-8")
 
           match = re.search(
-              r'^\s*streaming_domain\s*=\s*["\']([^"\']+)["\']',
+              r'^\s*sSTREAMING_DOMAIN\s*=\s*["\']([^"\']+)["\']',
               config,
               re.MULTILINE
           )
