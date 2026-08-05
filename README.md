@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.recipes
+https://streamingcommunityz.systems
 <!-- /BASE_URL -->
