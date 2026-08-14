@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.luxe
+https://streamingcommunityz.miami
 <!-- /BASE_URL -->
