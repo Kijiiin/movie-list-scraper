@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.partners
+https://streamingcommunityz.rodeo
 <!-- /BASE_URL -->
