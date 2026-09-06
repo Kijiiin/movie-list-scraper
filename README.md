@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.tax
+https://streamingcommunityz.taxi
 <!-- /BASE_URL -->
