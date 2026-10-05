@@ -10,7 +10,7 @@
 #   streamingcommunity.tv
 # ============================================================
 
-STREAMING_DOMAIN = "streamingcommunityz.photography"
+STREAMING_DOMAIN = "streamingcommunityz.promo"
 
 # URL di base
 BASE_URL = f"https://{STREAMING_DOMAIN}"
