@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.photography
+https://streamingcommunityz.promo
 <!-- /BASE_URL -->
