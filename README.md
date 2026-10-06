@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.promo
+https://streamingcommunityz.rip
 <!-- /BASE_URL -->
