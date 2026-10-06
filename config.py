@@ -10,7 +10,7 @@
 #   streamingcommunity.tv
 # ============================================================
 
-STREAMING_DOMAIN = "streamingcommunityz.promo"
+STREAMING_DOMAIN = "streamingcommunityz.rip"
 
 # URL di base
 BASE_URL = f"https://{STREAMING_DOMAIN}"
