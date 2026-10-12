@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.rip
+https://streamingcommunityz.shiksha
 <!-- /BASE_URL -->
