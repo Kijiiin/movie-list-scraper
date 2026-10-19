@@ -10,7 +10,7 @@
 #   streamingcommunity.tv
 # ============================================================
 
-STREAMING_DOMAIN = "streamingcommunityz.shiksha"
+STREAMING_DOMAIN = "streamingcommunityz.build"
 
 # URL di base
 BASE_URL = f"https://{STREAMING_DOMAIN}"
