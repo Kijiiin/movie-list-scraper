@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.shiksha
+https://streamingcommunityz.build
 <!-- /BASE_URL -->
