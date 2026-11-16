@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.nexus
+https://streamingcommunityz.dad
 <!-- /BASE_URL -->
