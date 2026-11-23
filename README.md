@@ -1,5 +1,5 @@
 ## Streaming Domain
 
 <!-- BASE_URL -->
-https://streamingcommunityz.dad
+https://streamingcommunityz.mov
 <!-- /BASE_URL -->
